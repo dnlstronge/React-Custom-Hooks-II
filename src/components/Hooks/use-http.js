@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-const useHttp = () => {
+const useHttp = (requestConfig, applyData ) => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
 
@@ -10,7 +10,11 @@ const useHttp = () => {
     setError(null);
     try {
       const response = await fetch(
-        'https://connectdb-1efa3-default-rtdb.europe-west1.firebasedatabase.app/tasks.json'
+        requestConfig.url, {
+            method: requestConfig.method,
+            headers: requestConfig.headers,
+            body: JSON.stringify(requestConfig.body)
+        }
       );
 
       if (!response.ok) {
@@ -18,14 +22,10 @@ const useHttp = () => {
       }
 
       const data = await response.json();
+      applyData(data)
+     
 
-      const loadedTasks = [];
-
-      for (const taskKey in data) {
-        loadedTasks.push({ id: taskKey, text: data[taskKey].text });
-      }
-
-      setTasks(loadedTasks);
+     
     } catch (err) {
       setError(err.message || 'Something went wrong!');
     }
